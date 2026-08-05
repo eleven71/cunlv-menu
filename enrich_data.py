@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """数据增强：为每道菜的食材添加归一化名称(norm)，供冰箱选材功能匹配使用
-用法: F:\python311\python.exe enrich_data.py
+用法: python enrich_data.py
 归一化规则见 norms.py（与 update_data.py 共用）
 """
 import json, os
