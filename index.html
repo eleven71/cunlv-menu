@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>村驴菜谱库 🍳</title>
+<style>
+:root{
+  --nav-bg:#2c3e50;
+  --body-bg:#fafaf8;
+  --card-bg:#ffffff;
+  --text:#1a1a1a;
+  --text-light:#6b6b6b;
+  --border:#e8e6e0;
+  --accent:#e67e22;
+  --accent2:#e74c3c;
+  --green:#27ae60;
+  --blue:#2980b9;
+  --purple:#8e44ad;
+  --teal:#16a085;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--body-bg);color:var(--text);font-family:"Microsoft YaHei","PingFang SC",system-ui,sans-serif;line-height:1.6}
+/* ===== 顶部导航 ===== */
+.top-nav{background:var(--nav-bg);color:#fff;padding:18px 24px}
+.top-nav h1{font-size:24px;color:#fff;letter-spacing:1px}
+.top-nav h1 span{color:#f39c12}
+.top-nav .subtitle{font-size:13px;color:#cfd8dc;margin-top:4px}
+/* ===== 统计条 ===== */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;max-width:1100px;margin:20px auto 0;padding:0 20px}
+.stat-card{background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px 10px;text-align:center}
+.stat-card .num{font-size:26px;font-weight:700}
+.stat-card .label{font-size:12px;color:var(--text-light);margin-top:2px}
+.stat-card:nth-child(1) .num{color:var(--accent2)}
+.stat-card:nth-child(2) .num{color:var(--accent)}
+.stat-card:nth-child(3) .num{color:var(--purple)}
+/* ===== 工具条 ===== */
+.toolbar{max-width:1100px;margin:16px auto 0;padding:0 20px;display:flex;gap:10px;flex-wrap:wrap}
+#search{flex:1;min-width:240px;padding:12px 16px;font-size:15px;border:2px solid var(--border);border-radius:10px;background:#fff;color:var(--text);outline:none}
+#search:focus{border-color:var(--accent)}
+#search::placeholder{color:#999}
+#random-btn{padding:12px 20px;font-size:15px;font-weight:700;background:var(--accent2);color:#fff;border:none;border-radius:10px;cursor:pointer;white-space:nowrap}
+#random-btn:hover{background:#c0392b}
+#fav-btn{padding:12px 20px;font-size:15px;font-weight:700;background:#fff;border:2px solid var(--border);border-radius:10px;cursor:pointer;color:var(--text);white-space:nowrap}
+#fav-btn:hover{border-color:var(--accent2)}
+#fav-btn.active{background:var(--accent2);border-color:var(--accent2);color:#fff}
+#fridge-btn{padding:12px 20px;font-size:15px;font-weight:700;background:#fff;border:2px solid var(--border);border-radius:10px;cursor:pointer;color:var(--text);white-space:nowrap}
+#fridge-btn:hover{border-color:var(--green)}
+#fridge-btn.active{background:var(--green);border-color:var(--green);color:#fff}
+/* 存储降级提示 */
+#storage-warn{display:none;max-width:1100px;margin:12px auto 0;padding:10px 16px;font-size:13px;background:#fef9e7;border:1px solid #f3d9a4;border-radius:8px;color:#a8620a}
+/* ===== 分类栏（三组） ===== */
+.cat-area{max-width:1100px;margin:14px auto 0;padding:0 20px;display:flex;flex-direction:column;gap:8px}
+.cat-group{display:flex;align-items:flex-start;gap:8px;flex-wrap:wrap}
+.cat-label{flex-shrink:0;font-size:12px;font-weight:700;color:#fff;background:var(--nav-bg);border-radius:4px;padding:5px 10px;margin-top:1px;letter-spacing:1px}
+.cat-pills{display:flex;flex-wrap:wrap;gap:6px}
+.cat-pill{padding:5px 12px;font-size:13px;background:#fff;border:1px solid var(--border);border-radius:20px;cursor:pointer;color:var(--text);user-select:none;transition:all .15s}
+.cat-pill:hover{border-color:var(--accent);color:var(--accent)}
+.cat-pill.active{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
+/* ===== 结果区 ===== */
+#result-info{max-width:1100px;margin:14px auto 0;padding:0 20px;font-size:13px;color:var(--text-light)}
+.grid{max-width:1100px;margin:10px auto 40px;padding:0 20px;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.card{background:var(--card-bg);border:1px solid var(--border);border-radius:10px;padding:16px;cursor:pointer;transition:box-shadow .15s,transform .1s;display:flex;flex-direction:column;gap:8px;position:relative}
+.card:hover{box-shadow:0 4px 14px rgba(0,0,0,.08);transform:translateY(-2px)}
+.card h3{font-size:17px;color:var(--text);padding-right:26px}
+.fav-star{position:absolute;top:12px;right:12px;font-size:20px;line-height:1;background:none;border:none;cursor:pointer;color:#cfcfcf;padding:2px;transition:color .15s;z-index:2}
+.fav-star:hover{color:#f39c12}
+.fav-star.on{color:#f1c40f}
+.fav-star.on:hover{color:#f39c12}
+.card .desc{font-size:13px;color:var(--text-light);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card .meta{font-size:12px;color:var(--text-light);display:flex;gap:12px}
+.card .tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:auto}
+.tag{font-size:11px;padding:2px 8px;border-radius:4px;color:#fff;background:var(--green)}
+.tag.t0{background:var(--accent2)}
+.tag.t1{background:var(--accent)}
+.tag.t2{background:var(--green)}
+.tag.t3{background:var(--blue)}
+.tag.t4{background:var(--purple)}
+.tag.t5{background:var(--teal)}
+#empty{display:none;text-align:center;color:var(--text-light);padding:60px 20px;font-size:15px}
+/* ===== 详情弹窗 ===== */
+#overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:100;overflow-y:auto;padding:30px 16px}
+#overlay.show{display:block}
+#modal{background:#fff;max-width:760px;margin:0 auto;border-radius:12px;padding:26px 30px;position:relative;color:var(--text)}
+#modal h2{font-size:22px;color:var(--text);padding-right:40px}
+#modal .m-desc{font-size:14px;color:var(--text-light);margin:6px 0 14px}
+#modal .m-meta{font-size:12px;color:var(--text-light);margin-bottom:14px;display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+#fav-modal-btn{padding:5px 14px;font-size:12px;border:1px solid var(--border);border-radius:16px;background:#fff;color:var(--text);cursor:pointer;font-weight:700}
+#fav-modal-btn.on{background:#f1c40f;border-color:#f1c40f;color:#fff}
+#close-btn{position:absolute;top:14px;right:16px;background:var(--nav-bg);color:#fff;border:none;width:32px;height:32px;border-radius:50%;font-size:16px;cursor:pointer;line-height:1}
+#close-btn:hover{background:#1a252f}
+.m-section{margin-top:18px}
+.m-section h4{font-size:15px;color:var(--nav-bg);border-left:4px solid var(--accent);padding-left:8px;margin-bottom:10px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{border:1px solid var(--border);padding:8px 10px;text-align:left;vertical-align:top}
+th{background:#f4f3ef;color:var(--text);font-weight:700}
+td:first-child{width:28%}
+td:nth-child(2){width:20%}
+td .orig{font-size:11px;color:#999;margin-left:4px}
+.sub-alt{display:inline-block;margin-top:4px;font-size:12px;background:#eef7ff;border:1px solid #bcd9f2;color:#1a5276;border-radius:4px;padding:3px 8px}
+.step-item{display:flex;gap:12px;margin-bottom:12px}
+.step-num{flex-shrink:0;width:26px;height:26px;border-radius:50%;background:var(--accent);color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.step-body{font-size:14px}
+.step-tip{margin-top:4px;font-size:12px;color:#a8620a;background:#fef9e7;border:1px solid #f3d9a4;border-radius:6px;padding:6px 10px}
+.tips-box{background:#fef9e7;border:1px solid #f3d9a4;border-radius:8px;padding:12px 14px;font-size:13px}
+.tips-box ul{margin-left:18px}
+.video-link{display:inline-block;margin-top:14px;padding:10px 18px;background:var(--blue);color:#fff;text-decoration:none;border-radius:8px;font-size:14px;font-weight:700}
+.video-link:hover{background:#1f618d}
+/* ===== 份量选择器 ===== */
+.portion{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:12px;padding:10px 14px;background:#f4f3ef;border:1px solid var(--border);border-radius:8px}
+.portion .p-label{font-size:13px;font-weight:700;color:var(--text)}
+.portion .p-hint{font-size:12px;color:var(--text-light)}
+.portion .p-btn{padding:5px 14px;font-size:13px;border:1px solid var(--border);border-radius:16px;background:#fff;cursor:pointer;color:var(--text)}
+.portion .p-btn.active{background:var(--green);border-color:var(--green);color:#fff;font-weight:700}
+.portion .p-btn:hover{border-color:var(--green)}
+/* ===== 冰箱选材面板 ===== */
+.fridge-head{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+.fridge-head h3{font-size:18px;color:var(--text)}
+.staple-toggle{display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;user-select:none;background:#f4f3ef;border:1px solid var(--border);border-radius:16px;padding:6px 14px;color:var(--text)}
+.staple-toggle input{accent-color:var(--green);width:15px;height:15px;cursor:pointer}
+.fridge-input-wrap{display:flex;gap:8px;margin-bottom:12px}
+#fridge-input{flex:1;padding:10px 14px;font-size:14px;border:2px solid var(--border);border-radius:8px;background:#fff;color:var(--text);outline:none}
+#fridge-input:focus{border-color:var(--green)}
+#fridge-input::placeholder{color:#999}
+.fridge-suggest{display:flex;flex-wrap:wrap;gap:6px;margin:-4px 0 10px}
+.fridge-suggest .sug{font-size:12px;background:#eef7ff;border:1px solid #bcd9f2;color:#1a5276;border-radius:12px;padding:3px 10px;cursor:pointer}
+.fridge-suggest .sug:hover{background:#d9ecfb}
+.fridge-picked{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.fridge-picked .chip{font-size:13px;background:var(--green);color:#fff;border-radius:14px;padding:4px 12px;cursor:pointer}
+.fridge-picked .chip:hover{background:#1e8449}
+.fridge-groups{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
+.fg-title{font-size:13px;font-weight:700;color:var(--nav-bg);margin-bottom:4px}
+.fg-btns{display:flex;flex-wrap:wrap;gap:6px}
+.ing-chip{font-size:13px;background:#fff;border:1px solid var(--border);border-radius:14px;padding:4px 12px;cursor:pointer;color:var(--text);user-select:none;transition:all .12s}
+.ing-chip:hover{border-color:var(--green);color:var(--green)}
+.ing-chip.on{background:var(--green);border-color:var(--green);color:#fff;font-weight:700}
+#fridge-go{padding:11px 0;width:100%;font-size:15px;font-weight:700;background:var(--green);color:#fff;border:none;border-radius:8px;cursor:pointer}
+#fridge-go:hover{background:#1e8449}
+.fridge-results{margin-top:16px}
+.fr-group-title{font-size:14px;font-weight:700;margin:12px 0 8px;padding-left:8px;border-left:4px solid var(--accent);color:var(--text)}
+.fr-group-title.full{border-color:var(--green)}
+.fr-group-title.miss1{border-color:var(--accent)}
+.fr-group-title.miss2{border-color:#95a5a6}
+.fr-card{display:flex;justify-content:space-between;align-items:center;gap:10px;background:#fff;border:1px solid var(--border);border-radius:8px;padding:10px 14px;margin-bottom:8px;cursor:pointer}
+.fr-card:hover{box-shadow:0 2px 8px rgba(0,0,0,.07)}
+.fr-card .name{font-size:14px;font-weight:700;color:var(--text)}
+.fr-card .miss{font-size:12px;color:var(--text-light)}
+.fr-card .miss b{color:#c0392b;font-weight:700}
+.fr-card .go{font-size:12px;color:var(--blue)}
+#fridge-hint{font-size:12px;color:var(--text-light);margin-top:8px}
+footer{max-width:1100px;margin:0 auto 30px;padding:0 20px;font-size:12px;color:var(--text-light);text-align:center}
+@media (max-width:640px){
+  .stats{grid-template-columns:repeat(3,1fr);gap:8px;padding:0 10px}
+  .grid{padding:0 10px;grid-template-columns:1fr}
+  .toolbar,.cat-area{padding:0 10px}
+  #modal{padding:18px 14px}
+}
+</style>
+</head>
+<body>
+
+<div class="top-nav">
+  <h1>🍳 村驴菜谱库 <span>·</span> 做饭届博士生导师</h1>
+  <div class="subtitle">保姆级美食教程 · 食材精确到克 · 跟着做不翻车</div>
+</div>
+
+<div class="stats">
+  <div class="stat-card"><div class="num" id="stat-recipes">0</div><div class="label">收录菜谱</div></div>
+  <div class="stat-card"><div class="num" id="stat-ing">0</div><div class="label">食材种类</div></div>
+  <div class="stat-card"><div class="num" id="stat-tags">0</div><div class="label">风味标签</div></div>
+</div>
+
+<div class="toolbar">
+  <input type="text" id="search" placeholder="🔍 搜菜名 / 食材 / 标签，比如：鸡胸肉、酸辣、蒸菜、红烧…">
+  <button id="random-btn">🎲 今天吃什么</button>
+  <button id="fav-btn">❤️ 我的收藏 (0)</button>
+  <button id="fridge-btn">🧊 冰箱选材</button>
+</div>
+
+<div id="storage-warn">⚠️ 当前浏览器禁用了本地存储，收藏只能保留到本次关闭网页前。建议用右下角「导出收藏」保存到文件。</div>
+
+<div class="cat-area">
+  <div class="cat-group"><span class="cat-label">荤素</span><div class="cat-pills" id="cats-meat"></div></div>
+  <div class="cat-group"><span class="cat-label">食材</span><div class="cat-pills" id="cats-ing"></div></div>
+  <div class="cat-group"><span class="cat-label">做法</span><div class="cat-pills" id="cats-method"></div></div>
+</div>
+
+<div id="result-info"></div>
+<div class="grid" id="grid"></div>
+<div id="empty">😶 没有找到匹配的菜，换个关键词试试～</div>
+
+<div id="overlay">
+  <div id="modal"></div>
+</div>
+
+<footer>
+  数据来源：<a href="https://github.com/Ryder-MHumble/Cunlv-Skill" style="color:var(--blue)">Ryder-MHumble/Cunlv-Skill</a>（MIT）· 教程版权归 <a href="https://space.bilibili.com/417298480" style="color:var(--blue)">B站UP主 村驴</a> 所有 · 仅供个人学习
+  <br>收藏备份：<a href="#" id="fav-export" style="color:var(--blue)">导出收藏</a> · <a href="#" id="fav-import" style="color:var(--blue)">导入收藏</a>
+</footer>
+<input type="file" id="fav-file" accept=".json,application/json" style="display:none">
+
+<script src="data/recipes.js"></script>
+<script>
+(function(){
+  'use strict';
+  var RECIPES = window.RECIPES || [];
+  var TAG_COLORS = ['t0','t1','t2','t3','t4','t5'];
+
+  /* ==================== 分类体系（三组维度） ==================== */
+  // 荤素组
+  var MEAT_CATS = [
+    {name:'全部', test:null},
+    {name:'🥩 荤菜', test:function(r){return isMeat(r)}},
+    {name:'🥬 素菜', test:function(r){return !isMeat(r)}}
+  ];
+  // 调料类误伤排除（含关键词但不是主料的食材）
+  var IGNORE_KWS = ['蒸鱼豉油','木鱼花','鲣鱼粉','鱼露','虾皮','虾米','开洋'];
+  function isIgnored(name){return IGNORE_KWS.some(function(k){return name.indexOf(k)>=0});}
+  // 食材组（多归属：一道菜可同时属于多类，如干烧鱼=鱼+猪肉配菜）
+  var ING_CATS = [
+    {name:'全部', kws:null},
+    {name:'🥚 蛋类', kws:['鸡蛋','鸭蛋','鹌鹑蛋','皮蛋','咸蛋','蛋黄','蛋清']},
+    {name:'🍖 内脏', kws:['猪肝','腰花','肥肠','猪肚','毛肚','黄喉','鸡胗','鸡肝','鸭肠','猪心','猪血','牛杂','羊杂','猪腰']},
+    {name:'🐟 鱼', kws:['鱼','鲈鱼','带鱼','鲫鱼','鲤鱼','草鱼','熏鱼','鱼片','鱼头','鳕鱼','巴沙鱼','龙利鱼','黑鱼','黄鱼','泥鳅','鳝鱼','鳗鱼','银鱼','多宝鱼','鲅鱼','鳜鱼','鲮鱼','鲶鱼','台鲅鱼']},
+    {name:'🦐 虾蟹贝', kws:['鱿鱼','大虾','活虾','基围虾','虾仁','虾滑','皮皮虾','龙虾','海虹','螃蟹','蟹','花甲','花蛤','蛏子','生蚝','扇贝','鲍鱼','海参','蛤蜊','八爪鱼','章鱼','海螺','干贝','瑶柱']},
+    {name:'🐂 牛羊肉', kws:['羊肉','牛肉','牛腩','牛腱','牛排','肥牛','牛骨','牛肋','羊排','羊蝎子','羊腿','羊骨']},
+    {name:'🐔 鸡鸭', kws:['鸡腿','鸡翅','鸡肉','鸡胸','鸡爪','鸡架','三黄鸡','童子鸡','土鸡','鸡脖','鸡排','鸡柳','鸡皮','鸭肉','鸭腿','鸭翅','鸭架','鸭血','老鸭','烤鸭','鸭脖','鸡全翅','鸡中翅']},
+    {name:'🐷 猪肉', kws:['五花肉','猪肉','排骨','里脊','猪蹄','猪皮','腊肠','火腿','肉末','瘦肉','肥肉','梅花肉','前腿','后腿','肉馅','香肠','肘子','培根','叉烧','护心肉','肉片','肉丝']},
+    {name:'🫘 豆制品', kws:['豆腐','豆干','豆皮','腐竹','豆泡','千张','豆浆','豆腐脑','素鸡','香干','干豆腐','冻豆腐','油豆腐']},
+    {name:'🍚 米面主食', kws:['面粉','面条','挂面','意面','米粉','河粉','凉皮','米饭','糯米','大米','馒头','包子','饺子','馄饨','饼','面包','年糕','粉丝','粉条','拉面','花卷','烧饼','油条','窝头','玉米面','燕麦','糙米','小米','面皮','面片','通心粉']}
+  ];
+  // 做法组
+  var METHOD_CATS = [
+    {name:'全部', kws:null},
+    {name:'🍳 炒', kws:['炒']},
+    {name:'🥘 炖焖', kws:['炖','红烧','焖','煨','卤','酱烧']},
+    {name:'♨️ 蒸', kws:['蒸']},
+    {name:'🍤 炸', kws:['炸','酥脆']},
+    {name:'🥗 凉拌', kws:['凉拌','凉菜','拌','腌']},
+    {name:'🍲 汤煲', kws:['汤','煲','砂锅','粥','羹']},
+    {name:'🍗 空气炸锅', kws:['空气炸锅','烤箱','烤']},
+    {name:'🥟 面点', kws:['面食','包子','饺子','饼','馒头','花卷','油条','烧饼','馄饨','馅饼']}
+  ];
+
+  // 荤素判定：食材命中肉/蛋类关键词即荤（米面主食、调料类不算）
+  function isMeat(r){
+    return ingCats(r).some(function(i){return i !== ING_CATS.length-1});
+  }
+  // 食材组判定（多归属）：返回命中的所有食材类别下标（米面主食除外）
+  function ingCats(r){
+    var res = [];
+    var names = (r.ingredients||[]).map(function(x){return x.name||''});
+    for(var i=1;i<ING_CATS.length;i++){
+      var hit = names.some(function(n){
+        if(isIgnored(n)) return false;
+        return ING_CATS[i].kws.some(function(k){return n.indexOf(k)>=0});
+      });
+      if(hit) res.push(i);
+    }
+    return res;
+  }
+  // 做法判定：tags + 菜名
+  function methodCat(r){
+    var hay = (r.tags||[]).concat([r.dish_name||'']);
+    for(var i=1;i<METHOD_CATS.length;i++){
+      var hit = hay.some(function(h){return METHOD_CATS[i].kws.some(function(k){return h.indexOf(k)>=0})});
+      if(hit) return i;
+    }
+    return 0;
+  }
+
+  /* ==================== 材料替代库 ==================== */
+  var SUBS = [
+    {kw:'辣鲜露', alt:'生抽+香醋+辣椒油（约1:1:0.5）'},
+    {kw:'冬古一品鲜', alt:'生抽'},
+    {kw:'藤椒油', alt:'花椒油，或花椒粉+热油'},
+    {kw:'黄皮柠檬', alt:'普通柠檬'},
+    {kw:'百香果', alt:'柠檬汁+橙汁（风味略不同）'},
+    {kw:'米曲', alt:'直接网购成品盐曲'},
+    {kw:'高度白酒', alt:'料酒'},
+    {kw:'郫县豆瓣酱', alt:'黄豆酱+辣椒面'},
+    {kw:'豆豉', alt:'黄豆酱'},
+    {kw:'十三香', alt:'五香粉'},
+    {kw:'老抽', alt:'生抽+少许糖（上色略浅）'},
+    {kw:'蚝油', alt:'生抽+少许糖提鲜'},
+    {kw:'味精', alt:'可省略，或用蚝油提鲜'},
+    {kw:'鸡精', alt:'可省略，或用蚝油提鲜'},
+    {kw:'白胡椒粉', alt:'黑胡椒粉'},
+    {kw:'花椒粒', alt:'花椒粉（用量减半）'},
+    {kw:'冰糖', alt:'白糖'},
+    {kw:'芝麻香油', alt:'熟油或省略'},
+    {kw:'小米辣', alt:'干辣椒段/辣椒面'},
+    {kw:'野山椒', alt:'小米辣+白醋'},
+    {kw:'泡椒', alt:'小米辣+白醋'},
+    {kw:'干辣椒', alt:'辣椒面'},
+    {kw:'龙口粉丝', alt:'红薯粉条/绿豆粉丝'},
+    {kw:'意面', alt:'挂面'},
+    {kw:'高筋面粉', alt:'中筋面粉'},
+    {kw:'低筋面粉', alt:'中筋面粉+玉米淀粉（4:1）'},
+    {kw:'糯米粉', alt:'粘米粉'},
+    {kw:'面包糠', alt:'馒头搓屑/薯片碎'},
+    {kw:'淡奶油', alt:'牛奶+黄油'},
+    {kw:'黄油', alt:'食用油'},
+    {kw:'鸡胸肉', alt:'去皮鸡腿肉'},
+    {kw:'五花肉', alt:'梅花肉/前腿肉'},
+    {kw:'牛腱子', alt:'牛腩'},
+    {kw:'活虾', alt:'冷冻虾仁（口感略逊）'},
+    {kw:'花甲', alt:'蛤蜊/蛏子'},
+    {kw:'香菜', alt:'芹菜叶，或不放'},
+    {kw:'香葱', alt:'大葱白/洋葱'},
+    {kw:'白芝麻', alt:'黑芝麻或不放'},
+    {kw:'陈醋', alt:'香醋/米醋'},
+    {kw:'白醋', alt:'米醋'},
+    {kw:'料酒', alt:'啤酒或清水'},
+    {kw:'甜面酱', alt:'黄豆酱+糖'},
+    {kw:'芝麻酱', alt:'花生酱'},
+    {kw:'番茄酱', alt:'新鲜番茄+糖'},
+    {kw:'小苏打', alt:'泡打粉（用量减半）'},
+    {kw:'鱼露', alt:'生抽+虾皮'},
+    {kw:'火腿肠', alt:'午餐肉'},
+    {kw:'牛奶', alt:'奶粉冲泡/燕麦奶'}
+  ];
+  function findSub(name){
+    for(var i=0;i<SUBS.length;i++){
+      if(name.indexOf(SUBS[i].kw)>=0) return SUBS[i].alt;
+    }
+    return null;
+  }
+
+  /* ==================== 用量缩放 ==================== */
+  var CN_NUM = {'一':1,'二':2,'两':2,'三':3,'四':4,'五':5,'六':6,'七':7,'八':8,'九':9,'十':10,'半':0.5};
+  function bestFrac(n){
+    if(n<0.02) return '0';
+    var cands=[[1,2],[1,3],[2,3],[1,4],[3,4],[1,5],[2,5],[3,5],[4,5],[1,6],[5,6],[1,8],[3,8],[5,8],[7,8],[1,10],[3,10],[7,10],[9,10]];
+    for(var i=0;i<cands.length;i++){
+      if(Math.abs(n-cands[i][0]/cands[i][1])<0.03) return cands[i][0]+'/'+cands[i][1];
+    }
+    return null;
+  }
+  function fmtNum(n){
+    var r=Math.round(n*100)/100;
+    if(Number.isInteger(r)) return String(r);
+    var f=bestFrac(r);
+    return f?f:String(r);
+  }
+  function scaleAmount(amount, factor){
+    if(!amount) return '';
+    if(factor===1) return amount;
+    var s=amount.replace(/[零一二三四五六七八九十两半]/g,function(c){return CN_NUM[c]!==undefined?String(CN_NUM[c]):c;});
+    s=s.replace(/(\d+)\s*\/\s*(\d+)/g,function(m,a,b){return fmtNum(parseFloat(a)/parseFloat(b)*factor);});
+    s=s.replace(/(\d+(?:\.\d+)?)/g,function(m){return fmtNum(parseFloat(m)*factor);});
+    return s;
+  }
+
+  /* ==================== 收藏 ==================== */
+  var FAV_KEY='cunlv_favs_v1';
+  var favs=[],favOk=true;
+  try{favs=JSON.parse(localStorage.getItem(FAV_KEY)||'[]')||[];}catch(e){favOk=false;}
+  if(!Array.isArray(favs)) favs=[];
+  function saveFavs(){
+    if(!favOk) return;
+    try{localStorage.setItem(FAV_KEY,JSON.stringify(favs));}catch(e){favOk=false;showStorageWarn();}
+  }
+  function showStorageWarn(){document.getElementById('storage-warn').style.display='block';}
+  function isFav(name){return favs.indexOf(name)>=0;}
+  function toggleFav(name){
+    var i=favs.indexOf(name);
+    if(i>=0){favs.splice(i,1);}else{favs.unshift(name);}
+    saveFavs();updateFavBtn();
+  }
+  function updateFavBtn(){
+    var b=document.getElementById('fav-btn');
+    b.textContent='❤️ 我的收藏 ('+favs.length+')';
+    b.classList.toggle('active',state.favOnly);
+  }
+  function exportFavs(){
+    var blob=new Blob([JSON.stringify(favs,null,1)],{type:'application/json'});
+    var a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    a.download='cunlv_favs_'+new Date().toISOString().slice(0,10)+'.json';
+    document.body.appendChild(a);a.click();a.remove();
+    setTimeout(function(){URL.revokeObjectURL(a.href);},1000);
+  }
+  function importFavs(file){
+    var reader=new FileReader();
+    reader.onload=function(){
+      try{
+        var arr=JSON.parse(reader.result);
+        if(!Array.isArray(arr)) throw new Error('格式不对');
+        favs=arr.filter(function(n){return typeof n==='string'});
+        saveFavs();updateFavBtn();render();
+        alert('✅ 已导入 '+favs.length+' 个收藏');
+      }catch(e){alert('❌ 导入失败：文件不是有效的收藏 JSON');}
+    };
+    reader.readAsText(file);
+  }
+  document.getElementById('fav-btn').addEventListener('click',function(){
+    state.favOnly=!state.favOnly;updateFavBtn();render();
+  });
+  document.getElementById('fav-export').addEventListener('click',function(e){e.preventDefault();exportFavs();});
+  document.getElementById('fav-import').addEventListener('click',function(e){e.preventDefault();document.getElementById('fav-file').click();});
+  document.getElementById('fav-file').addEventListener('change',function(){
+    if(this.files&&this.files[0]) importFavs(this.files[0]);
+    this.value='';
+  });
+  if(!favOk) showStorageWarn();
+
+  /* ==================== 冰箱选材 ==================== */
+  // 常备调料（开关开启时视为已有）
+  var STAPLE_SET = ['食用油','盐','白糖','冰糖','生抽','老抽','蚝油','味精','鸡精','大蒜','姜','大葱','小葱','洋葱','八角','花椒','花椒粉','香叶','桂皮','白胡椒粉','黑胡椒粉','十三香','五香粉','干辣椒','辣椒面','小米辣','料酒','陈醋','香醋','白醋','淀粉','香油','辣椒油','白芝麻','黄豆酱','郫县豆瓣酱','甜面酱','豆豉','番茄酱','蜂蜜','猪油','高度白酒','孜然','野山椒','泡椒','剁椒','虾皮'];
+  // 快捷食材面板
+  var FRIDGE_GROUPS = [
+    {title:'🥩 肉蛋', ings:['五花肉','肉馅','排骨','里脊肉','瘦肉','猪蹄','香肠','鸡腿','鸡翅','鸡胸肉','鸡爪','整鸡','牛肉','牛腩','牛腱子','肥牛卷','羊肉','鸡蛋','皮蛋']},
+    {title:'🦐 水产', ings:['大虾','虾仁','鱿鱼','鲈鱼','鲫鱼','鲤鱼','草鱼','带鱼','巴沙鱼','花蛤','蛏子','生蚝','扇贝','鲍鱼','螃蟹','干贝','海带','紫菜']},
+    {title:'🥬 蔬菜', ings:['土豆','胡萝卜','青椒','茄子','番茄','黄瓜','大白菜','娃娃菜','包菜','菠菜','油菜','生菜','芹菜','韭菜','蒜苔','豆角','西兰花','莲藕','白萝卜','南瓜','冬瓜','玉米','香菇','木耳','金针菇','杏鲍菇','豆芽','香菜','洋葱']},
+    {title:'🫘 豆制品', ings:['豆腐','豆干','豆皮','腐竹','豆泡','素鸡']},
+    {title:'🍚 主食', ings:['大米','面条','面粉','糯米','粉丝','粉条','年糕','饺子皮','馒头','米粉']},
+    {title:'🍎 其他', ings:['花生米','白芝麻','黑芝麻','枸杞','红枣','柠檬','百香果','酸奶','牛奶','黄油']}
+  ];
+  var fridge={items:[],staple:true};
+  // 全部可选手材料（用于输入联想）
+  var ALL_INGS=[];
+  RECIPES.forEach(function(r){
+    (r.ings_norm||[]).forEach(function(n){if(ALL_INGS.indexOf(n)<0)ALL_INGS.push(n)});
+  });
+  ALL_INGS.sort();
+
+  function openFridge(){
+    var m=document.getElementById('modal');
+    var stapleChecked=fridge.staple?'checked':'';
+    var pickedHtml=fridge.items.map(function(n){
+      return '<span class="chip" data-n="'+esc(n)+'">'+esc(n)+' ✕</span>';
+    }).join('');
+    var groupsHtml=FRIDGE_GROUPS.map(function(g){
+      var btns=g.ings.map(function(n){
+        var on=fridge.items.indexOf(n)>=0?' on':'';
+        return '<span class="ing-chip'+on+'" data-n="'+esc(n)+'">'+esc(n)+'</span>';
+      }).join('');
+      return '<div class="fg"><div class="fg-title">'+g.title+'</div><div class="fg-btns">'+btns+'</div></div>';
+    }).join('');
+    m.innerHTML=
+      '<button id="close-btn" onclick="document.getElementById(\'overlay\').classList.remove(\'show\')">✕</button>'+
+      '<div class="fridge-head"><h3>🧊 冰箱里有什么？</h3>'+
+      '<label class="staple-toggle"><input type="checkbox" id="staple-check" '+stapleChecked+'>常备调料我都有（盐油糖酱油等）</label></div>'+
+      '<div class="fridge-input-wrap"><input type="text" id="fridge-input" placeholder="输入食材名，比如：牛腩、虾仁…"><button id="fridge-add">➕</button></div>'+
+      '<div class="fridge-suggest" id="fridge-suggest"></div>'+
+      '<div class="fridge-picked" id="fridge-picked">'+pickedHtml+'</div>'+
+      '<div class="fridge-groups">'+groupsHtml+'</div>'+
+      '<button id="fridge-go">🎯 看看能做什么菜</button>'+
+      '<div class="fridge-results" id="fridge-results"></div>'+
+      '<div id="fridge-hint">提示：点选/输入冰箱里有的材料，勾掉「常备调料」可精确到连调料都算进去。</div>';
+    // 事件
+    document.getElementById('staple-check').addEventListener('change',function(){
+      fridge.staple=this.checked;
+    });
+    document.getElementById('fridge-add').addEventListener('click',addFridgeInput);
+    document.getElementById('fridge-input').addEventListener('keydown',function(e){
+      if(e.key==='Enter'){e.preventDefault();addFridgeInput();}
+    });
+    document.getElementById('fridge-input').addEventListener('input',fridgeSuggest);
+    m.querySelectorAll('.ing-chip').forEach(function(chip){
+      chip.addEventListener('click',function(){
+        var n=chip.getAttribute('data-n');
+        var i=fridge.items.indexOf(n);
+        if(i>=0){fridge.items.splice(i,1);}else{fridge.items.push(n);}
+        openFridge();
+      });
+    });
+    m.querySelectorAll('.fridge-picked .chip').forEach(function(chip){
+      chip.addEventListener('click',function(){
+        var n=chip.getAttribute('data-n');
+        var i=fridge.items.indexOf(n);
+        if(i>=0)fridge.items.splice(i,1);
+        openFridge();
+      });
+    });
+    document.getElementById('fridge-go').addEventListener('click',fridgeSearch);
+    document.getElementById('overlay').classList.add('show');
+    document.getElementById('overlay').scrollTop=0;
+    document.getElementById('fridge-btn').classList.add('active');
+  }
+  function addFridgeInput(){
+    var inp=document.getElementById('fridge-input');
+    var v=(inp.value||'').trim();
+    if(!v) return;
+    if(fridge.items.indexOf(v)<0) fridge.items.push(v);
+    inp.value='';
+    document.getElementById('fridge-suggest').innerHTML='';
+    openFridge();
+  }
+  function fridgeSuggest(){
+    var v=(document.getElementById('fridge-input').value||'').trim();
+    var box=document.getElementById('fridge-suggest');
+    if(!v){box.innerHTML='';return;}
+    var hits=ALL_INGS.filter(function(n){
+      return n.indexOf(v)>=0 && fridge.items.indexOf(n)<0;
+    }).slice(0,8);
+    box.innerHTML=hits.map(function(n){
+      return '<span class="sug" data-n="'+esc(n)+'">'+esc(n)+'</span>';
+    }).join('');
+    box.querySelectorAll('.sug').forEach(function(s){
+      s.addEventListener('click',function(){
+        fridge.items.push(s.getAttribute('data-n'));
+        document.getElementById('fridge-input').value='';
+        box.innerHTML='';
+        openFridge();
+      });
+    });
+  }
+  function fridgeSearch(){
+    var have=fridge.items.slice();
+    if(fridge.staple) have=have.concat(STAPLE_SET);
+    var groups={full:[],miss1:[],miss2:[]};
+    var hidden=0;
+    RECIPES.forEach(function(r){
+      var need=(r.ings_norm||[]).filter(function(n){return have.indexOf(n)<0});
+      var l=need.length;
+      if(l===0)groups.full.push({r:r,miss:[]});
+      else if(l===1)groups.miss1.push({r:r,miss:need});
+      else if(l===2)groups.miss2.push({r:r,miss:need});
+      else hidden++;
+    });
+    var box=document.getElementById('fridge-results');
+    var html='';
+    var titles=[['full','✅ 材料齐全，直接开做','fr-group-title full'],['miss1','🟡 只缺 1 样，买一样就能做','fr-group-title miss1'],['miss2','🔵 缺 2 样','fr-group-title miss2']];
+    titles.forEach(function(t){
+      var list=groups[t[0]];
+      if(!list.length) return;
+      html+='<div class="'+t[2]+'">'+t[1]+'（'+list.length+'道）</div>';
+      list.forEach(function(item){
+        var missHtml=item.miss.length?'<span class="miss">还缺：<b>'+item.miss.map(esc).join('、')+'</b></span>':'<span class="go">▶ 看菜谱</span>';
+        html+='<div class="fr-card" data-i="'+item.r.id+'"><span class="name">'+esc(item.r.dish_name)+'</span>'+missHtml+'</div>';
+      });
+    });
+    if(hidden) html+='<div id="fridge-hint" style="margin-top:10px">还有 '+hidden+' 道菜缺 3 样以上，已隐藏</div>';
+    box.innerHTML=html||'<div id="fridge-hint">先选点食材再搜～</div>';
+    box.querySelectorAll('.fr-card').forEach(function(card){
+      card.addEventListener('click',function(){
+        var id=parseInt(card.getAttribute('data-i'),10);
+        var r=RECIPES.filter(function(x){return x.id===id})[0];
+        if(r) openModal(r);
+      });
+    });
+  }
+  document.getElementById('fridge-btn').addEventListener('click',function(){
+    if(document.getElementById('overlay').classList.contains('show')&&document.getElementById('modal').querySelector('.fridge-head')){
+      document.getElementById('overlay').classList.remove('show');
+      document.getElementById('fridge-btn').classList.remove('active');
+    }else{
+      openFridge();
+    }
+  });
+
+  // 关闭弹窗时同步按钮状态
+  var overlayEl=document.getElementById('overlay');
+  var origClose=overlayEl.addEventListener;
+  overlayEl.addEventListener('click',function(e){
+    if(e.target===this){
+      this.classList.remove('show');
+      document.getElementById('fridge-btn').classList.remove('active');
+    }
+  });
+
+  /* ==================== 界面状态 ==================== */
+  var state={kw:'',meat:0,ing:0,method:0,portion:1,favOnly:false};
+
+  // 统计
+  var ingSet={},tagSet={};
+  RECIPES.forEach(function(r){
+    (r.ingredients||[]).forEach(function(x){ingSet[x.name]=1});
+    (r.tags||[]).forEach(function(t){tagSet[t]=1});
+  });
+  document.getElementById('stat-recipes').textContent=RECIPES.length;
+  document.getElementById('stat-ing').textContent=Object.keys(ingSet).length;
+  document.getElementById('stat-tags').textContent=Object.keys(tagSet).length;
+
+  // 分类栏渲染
+  function buildCats(elId, cats, key){
+    var el=document.getElementById(elId);
+    cats.forEach(function(c,i){
+      var pill=document.createElement('span');
+      pill.className='cat-pill'+(i===0?' active':'');
+      pill.textContent=c.name;
+      pill.addEventListener('click',function(){
+        state[key]=i;
+        el.querySelectorAll('.cat-pill').forEach(function(p){p.classList.remove('active')});
+        pill.classList.add('active');
+        render();
+      });
+      el.appendChild(pill);
+    });
+  }
+  buildCats('cats-meat',MEAT_CATS,'meat');
+  buildCats('cats-ing',ING_CATS,'ing');
+  buildCats('cats-method',METHOD_CATS,'method');
+
+  function matchAll(r){
+    if(state.favOnly && !isFav(r.dish_name)) return false;
+    if(state.meat!==0 && !MEAT_CATS[state.meat].test(r)) return false;
+    if(state.ing!==0 && ingCats(r).indexOf(state.ing)<0) return false;
+    if(state.method!==0 && methodCat(r)!==state.method) return false;
+    if(state.kw){
+      var kw=state.kw.toLowerCase();
+      var hay=[r.dish_name,r.description].concat(r.tags||[],(r.ingredients||[]).map(function(x){return x.name}));
+      if(!hay.some(function(h){return h&&h.toLowerCase().indexOf(kw)>=0})) return false;
+    }
+    return true;
+  }
+
+  function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+  function tagHtml(tags){
+    return (tags||[]).slice(0,6).map(function(t,i){return '<span class="tag '+TAG_COLORS[i%TAG_COLORS.length]+'">'+esc(t)+'</span>';}).join('');
+  }
+
+  function render(){
+    var list=RECIPES.filter(matchAll);
+    var grid=document.getElementById('grid'),empty=document.getElementById('empty');
+    var info=document.getElementById('result-info');
+    grid.innerHTML='';
+    list.forEach(function(r){
+      var card=document.createElement('div');
+      card.className='card';
+      var dur=r.duration?Math.round(r.duration/60)+'分钟':'';
+      var date=(r.pub_date||'').slice(0,7);
+      var favCls=isFav(r.dish_name)?'fav-star on':'fav-star';
+      card.innerHTML='<button class="'+favCls+'" title="收藏">'+(isFav(r.dish_name)?'★':'☆')+'</button>'+
+        '<h3>'+esc(r.dish_name)+'</h3>'+
+        '<div class="desc">'+esc(r.description)+'</div>'+
+        '<div class="meta">'+(dur?'⏱️ '+dur:'')+(date?' · 📅 '+date:'')+'</div>'+
+        '<div class="tags">'+tagHtml(r.tags)+'</div>';
+      card.querySelector('.fav-star').addEventListener('click',function(e){
+        e.stopPropagation();
+        toggleFav(r.dish_name);
+        render();
+      });
+      card.addEventListener('click',function(){openModal(r)});
+      grid.appendChild(card);
+    });
+    empty.style.display=list.length?'none':'block';
+    info.textContent=list.length?'共 '+list.length+' 道菜':'';
+  }
+
+  /* ==================== 详情弹窗 ==================== */
+  function ingRowHtml(x, factor){
+    var scaled=scaleAmount(x.amount||'',factor);
+    var amtHtml=factor===1?esc(x.amount||''):
+      '<strong>'+esc(scaled)+'</strong><span class="orig">原'+esc(x.amount||'')+'</span>';
+    var sub=findSub(x.name||'');
+    var subHtml=sub?'<div class="sub-alt">🔄 没有？可用 '+esc(sub)+'</div>':'';
+    return '<tr><td>'+esc(x.name)+'</td><td>'+amtHtml+'</td><td>'+esc(x.note||'')+subHtml+'</td></tr>';
+  }
+  function openModal(r){
+    document.getElementById('fridge-btn').classList.remove('active');
+    var m=document.getElementById('modal');
+    // 份量选择器
+    var portionBtns=[0.5,1,1.5,2,3].map(function(f){
+      var label=f===1?'1倍（原配方）':f+'倍';
+      return '<button class="p-btn'+(state.portion===f?' active':'')+'" data-f="'+f+'">'+label+'</button>';
+    }).join('');
+    var ingRows=(r.ingredients||[]).map(function(x){return ingRowHtml(x,state.portion)}).join('');
+    var stepHtml=(r.steps||[]).map(function(s){
+      return '<div class="step-item"><div class="step-num">'+s.order+'</div><div class="step-body">'+
+        '<strong>'+esc(s.action)+'</strong>'+(s.detail?'<div>'+esc(s.detail)+'</div>':'')+
+        (s.tip?'<div class="step-tip">💡 '+esc(s.tip)+'</div>':'')+'</div></div>';
+    }).join('');
+    var tipsHtml=(r.tips&&r.tips.length)?
+      '<div class="m-section"><h4>⚠️ 村驴的叮嘱</h4><div class="tips-box"><ul>'+
+      r.tips.map(function(t){return '<li>'+esc(t)+'</li>'}).join('')+'</ul></div></div>':'';
+    var video=r.video_url?'<a class="video-link" href="'+esc(r.video_url)+'" target="_blank">▶️ 看原视频教程</a>':'';
+    m.innerHTML=
+      '<button id="close-btn" onclick="document.getElementById(\'overlay\').classList.remove(\'show\')">✕</button>'+
+      '<h2>'+esc(r.dish_name)+'</h2>'+
+      '<div class="m-desc">'+esc(r.description)+'</div>'+
+      '<div class="m-meta">'+(r.pub_date?'📅 发布 '+esc(r.pub_date):'')+(r.duration?' · ⏱️ '+Math.round(r.duration/60)+'分钟':'')+
+      ' <button id="fav-modal-btn" class="'+(isFav(r.dish_name)?'on':'')+'">'+(isFav(r.dish_name)?'★ 已收藏':'☆ 收藏')+'</button></div>'+
+      '<div class="m-section"><h4>📋 食材准备</h4>'+
+      '<div class="portion"><span class="p-label">🍽️ 份量</span>'+
+      portionBtns+'<span class="p-hint">按比例自动换算用量（1倍=村驴原配方，约2-3人份）</span></div>'+
+      '<table style="margin-top:10px"><tr><th>食材</th><th>用量</th><th>备注</th></tr>'+ingRows+'</table></div>'+
+      '<div class="m-section"><h4>👩‍🍳 做法步骤</h4>'+stepHtml+'</div>'+
+      tipsHtml+video;
+    // 份量按钮事件
+    m.querySelectorAll('.p-btn').forEach(function(btn){
+      btn.addEventListener('click',function(){
+        state.portion=parseFloat(btn.getAttribute('data-f'));
+        openModal(r);
+      });
+    });
+    // 收藏按钮事件
+    m.querySelector('#fav-modal-btn').addEventListener('click',function(){
+      toggleFav(r.dish_name);
+      var b=m.querySelector('#fav-modal-btn');
+      b.textContent=isFav(r.dish_name)?'★ 已收藏':'☆ 收藏';
+      b.classList.toggle('on',isFav(r.dish_name));
+      render();
+    });
+    document.getElementById('overlay').classList.add('show');
+    document.getElementById('overlay').scrollTop=0;
+  }
+
+  // 搜索（防抖）
+  var searchEl=document.getElementById('search'),timer=null;
+  searchEl.addEventListener('input',function(){
+    clearTimeout(timer);
+    timer=setTimeout(function(){state.kw=searchEl.value.trim();render();},150);
+  });
+
+  // 随机推荐
+  document.getElementById('random-btn').addEventListener('click',function(){
+    var list=RECIPES.filter(matchAll);
+    if(!list.length) return;
+    openModal(list[Math.floor(Math.random()*list.length)]);
+  });
+
+  // 点遮罩关闭
+  document.getElementById('overlay').addEventListener('click',function(e){
+    if(e.target===this) this.classList.remove('show');
+  });
+
+  render();
+  updateFavBtn();
+})();
+</script>
+</body>
+</html>

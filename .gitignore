@@ -1,0 +1,14 @@
+# 本地缓存/备份
+*.bak
+*.backup
+data/.backups/
+.DS_Store
+Thumbs.db
+
+# Python
+__pycache__/
+*.pyc
+
+# 临时文件
+*.tmp
+tmp_*/
