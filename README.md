@@ -1,6 +1,6 @@
 # 村驴菜谱库 🍳
 
-本地菜谱网页：把 B站美食UP主「村驴」的保姆级教程整理成可搜索的文字菜谱库。
+把 B站美食UP主「村驴」的保姆级教程整理成可搜索的文字菜谱库。
 
 **零依赖纯静态**：下载后双击 `index.html` 即可使用，无需服务器、无需联网、数据全内置（约1.6MB）。
 
@@ -20,20 +20,59 @@
 - 当前收录：**318 道菜**（过滤广告/无效条目后），508 种标准化食材
 - 数据文件：`data/recipes.js`（自动生成，勿手改）
 - 每道菜含 `ings_norm` 归一化食材（手枪鸡腿→鸡腿、五花肉馅→肉馅），供冰箱选材精确匹配
-- 来源：https://github.com/Ryder-MHumble/Cunlv-Skill （MIT，含更新管道）
+- 数据来源：https://github.com/Ryder-MHumble/Cunlv-Skill （MIT License）
 
 ## 更新数据
 
 上游项目更新菜谱后，重新下载其 `references/recipe_db.jsonl`，然后运行：
 
+```bash
+# 方式一：指定上游 JSONL 路径
+python update_data.py /path/to/recipe_db.jsonl
+
+# 方式二：默认读取 ../Cunlv-Skill/references/recipe_db.jsonl（上游项目 clone 在相邻目录）
+python update_data.py
 ```
-F:\python311\python.exe update_data.py
-```
 
-脚本会重新生成 `data/recipes.js`（数据来源路径在脚本头部 SRC 变量）。
-归一化规则在 `norms.py`（update_data.py 与 enrich_data.py 共用，改规则只需改一处）。
-只给现有数据补归一化字段可运行 `enrich_data.py`。
+脚本会重新生成 `data/recipes.js`。归一化规则在 `norms.py`（update_data.py 与 enrich_data.py 共用，改规则只需改一处）。
+只给现有数据补归一化字段可运行 `python enrich_data.py`。
 
-## 版权
+## 版权与合规声明（请先阅读）
 
-教程版权归 B站UP主 村驴（https://space.bilibili.com/417298480）所有，仅供个人学习使用。
+本项目涉及两层内容，版权归属不同，请务必区分：
+
+| 内容 | 版权归属 | 许可情况 |
+|---|---|---|
+| 网页代码、脚本、数据管道（index.html / norms.py / update_data.py 等） | 本项目作者 | MIT License，自由使用 |
+| 菜谱文字整理（data/recipes.js） | 整理自 B站UP主「村驴」的视频教程，**版权归村驴所有** | 未经村驴本人授权 |
+| 上游数据管道（Ryder-MHumble/Cunlv-Skill） | 上游项目作者 | MIT License（允许再分发，需保留声明） |
+
+**风险提示（诚实说明）**：
+- 菜谱文字是本项目对村驴视频教程内容的结构化整理，属于**未经授权的衍生整理**。上游项目（Cunlv-Skill）以同样方式存在，但严格来说村驴或其版权方有权提出异议。
+- 本项目已尽力降低风险：**非商业用途**、每条菜谱**保留原视频链接**（引导用户观看原视频）、README 与 LICENSE 中**明示版权归属与致谢**。
+- 若村驴本人或版权方提出异议，本项目将**立即下架相关数据**。请勿将本项目用于任何商业场景。
+
+**对本项目使用者**：请仅用于个人学习参考。做菜前建议以原视频为准（每条菜谱底部都有「▶️ 看原视频教程」按钮）。
+
+## 隐私声明
+
+本项目**不含任何个人信息、API 密钥或本地路径**：
+- 代码与数据中无 API key / token / 密码（发布前已全量扫描验证）
+- 无作者个人信息（邮箱、手机号、真实姓名等）
+- 脚本全部使用相对路径，clone 到任何位置均可直接运行
+- 网页完全离线运行，不向任何服务器发送数据（收藏存在你浏览器本地 localStorage）
+
+## AI 参与说明
+
+本项目由 **Hermes Agent（AI 助手）与人类协作完成**，分工如下：
+
+- **人类（项目发起人）**：需求规划、功能验收、测试反馈
+- **AI（Hermes Agent）**：网页 UI/交互实现、数据管道编写、食材归一化引擎（norms.py）、菜谱数据增强（ings_norm）、份量换算/材料替代/收藏/冰箱选材等全部功能代码
+
+菜谱内容版权归原作者所有（见上），AI 仅参与代码与数据处理，不拥有任何内容版权。
+
+## 致谢
+
+- 感谢 B站UP主 **村驴**（https://space.bilibili.com/417298480）创作的优质保姆级美食教程——她才是真正教做饭的人
+- 感谢 **Ryder-MHumble/Cunlv-Skill** 提供的开源数据管道与结构化菜谱数据（MIT License）
+- 感谢 **Hermes Agent**（Nous Research）辅助完成本项目全部代码开发

@@ -6,7 +6,8 @@
 import json, os
 import norms
 
-SRC = r'F:\hermes\cunlv-menu\data\recipes.js'
+# 脚本位于项目根目录，数据文件用相对路径（兼容任意 clone 位置）
+SRC = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data', 'recipes.js')
 
 with open(SRC, encoding='utf-8') as f:
     content = f.read()

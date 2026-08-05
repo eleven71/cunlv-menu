@@ -8,11 +8,14 @@
 说明: 归一化(ings_norm)把食材变体合并为标准名（手枪鸡腿→鸡腿、五花肉馅→肉馅），
 供网页"冰箱选材"功能做精确匹配。MERGE 映射与 enrich_data.py 保持一致。
 """
-import json, os, collections
+import json, os, collections, sys
 import norms
 
-SRC = r"F:\hermes\tmp_cunlv\Cunlv-Skill-main\references\recipe_db.jsonl"
-DST = r"F:\hermes\cunlv-menu\data\recipes.js"
+# 用法: python update_data.py [recipe_db.jsonl路径]
+# 默认从上游项目 clone 目录读取（../Cunlv-Skill/references/recipe_db.jsonl）
+BASE = os.path.dirname(os.path.abspath(__file__))
+SRC = sys.argv[1] if len(sys.argv) > 1 else os.path.join(BASE, '..', 'Cunlv-Skill', 'references', 'recipe_db.jsonl')
+DST = os.path.join(BASE, 'data', 'recipes.js')
 
 recipes = []
 with open(SRC, encoding="utf-8") as f:
