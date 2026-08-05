@@ -2,11 +2,11 @@
 """村驴菜谱 JSONL → recipes.js 转换脚本（含食材归一化）
 
 用法:
-    F:\python311\python.exe update_data.py          # 从上游 JSONL 重新生成
-    F:\python311\python.exe enrich_data.py           # 只给现有 recipes.js 补归一化字段
+    python update_data.py [recipe_db.jsonl路径]   # 从上游 JSONL 重新生成
+    python enrich_data.py                          # 只给现有 recipes.js 补归一化字段
 
 说明: 归一化(ings_norm)把食材变体合并为标准名（手枪鸡腿→鸡腿、五花肉馅→肉馅），
-供网页"冰箱选材"功能做精确匹配。MERGE 映射与 enrich_data.py 保持一致。
+供网页"冰箱选材"功能做精确匹配。归一化规则见 norms.py（两脚本共用）。
 """
 import json, os, collections, sys
 import norms
